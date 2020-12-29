@@ -1,0 +1,77 @@
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { listProducts } from '../actions/productActions';
+import { detailsUser } from '../actions/userActions';
+import LoadingBox from '../components/LoadingBox';
+import MessageBox from '../components/MessageBox';
+import Product from '../components/Product';
+import Rating from '../components/Rating';
+
+export default function SellerScreen(props) {
+  const sellerId = props.match.params.id;
+  const userDetails = useSelector((state) => state.userDetails);
+  const { loading, error, user } = userDetails;
+
+  const productList = useSelector((state) => state.productList);
+  const {
+    loading: loadingProducts,
+    error: errorProducts,
+    products,
+  } = productList;
+
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(detailsUser(sellerId));
+    dispatch(listProducts({ seller: sellerId }));
+  }, [dispatch, sellerId]);
+  return (
+    <div className="">
+
+      <div className="">
+        {loading ? (
+          <LoadingBox></LoadingBox>
+        ) : error ? (
+          <MessageBox variant="danger">{error}</MessageBox>
+        ) : (
+
+              <ul className="">
+                <div className="carduser">
+                  <img className="small" src={user.seller.logo} alt={user.seller.name}></img>
+                  {user.seller.name}
+                  <p className="title">CEO &amp; Founder, Example</p>
+                  <p>Harvard University</p>
+                  <div style={{ margin: '24px 0' }}>
+                    <a href="#"><i className="fa fa-dribbble" /></a>
+                    <a href="#"><i className="fa fa-twitter" /></a>
+                    <a href="#"><i className="fa fa-linkedin" /></a>
+                    <a href="#"><i className="fa fa-facebook" /></a>
+                    <br></br><br></br>
+                    {user.seller.description}
+                  </div>
+                  <p> <a href="/ContastUs"><button>Liên hệ</button> </a></p>
+                </div>
+              </ul>
+            )}
+      </div>
+      <div className="col-3">
+        {loadingProducts ? (
+          <LoadingBox></LoadingBox>
+        ) : errorProducts ? (
+          <MessageBox variant="danger">{errorProducts}</MessageBox>
+        ) : (
+              <>
+                {products.length === 0 && <MessageBox>Không có sản phẩm nào</MessageBox>}
+                <div className="wrapper">
+                  <div className="row">
+                    {products.map((product) => (
+
+                      <Product key={product._id} product={product}></Product>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+      </div>
+    </div>
+  );
+}
